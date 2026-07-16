@@ -10,9 +10,25 @@ const MarketIndices = ({ data = [], error = null }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '20vh'
+        maxHeight: '2vh'
       }}>
         <h2 style={{ color: '#d32f2f', marginBottom: '1rem' }}>Error Loading Sectors</h2>
+        
+      </div>
+    )
+  }
+
+  if (data.length === 0 && !error ) {
+    return (
+      <div style={{
+        padding: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        maxHeight: '0.5vh'
+      }}>
+        <h2 style={{ color: '#d32f2f', marginBottom: '1rem' }}>No Market Indices Available</h2>
         
       </div>
     )

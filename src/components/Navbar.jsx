@@ -1,6 +1,6 @@
 import React from 'react';
-import { Navbar as BootstrapNavbar, Nav, Form, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Navbar as BootstrapNavbar, Nav } from 'react-bootstrap';
+import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
   return (
@@ -9,8 +9,12 @@ const Navbar = () => {
         <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
         <BootstrapNavbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/option-chain">Option Chain</Nav.Link>
+            <Nav.Link as={NavLink} to="/" end>
+              Home
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/option-chain">
+              Option Chain
+            </Nav.Link>
           </Nav>
         
         </BootstrapNavbar.Collapse>

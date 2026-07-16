@@ -1,6 +1,7 @@
 import {
     createBrowserRouter,
     createRoutesFromElements,
+    Navigate,
     Route,
 } from "react-router-dom";
 
@@ -22,6 +23,11 @@ const router = createBrowserRouter(
             <Route
                 path="option-chain"
                 element={<OptionChain />}
+            />
+
+            <Route
+                path="home"
+                element={<Navigate to="/" replace />}
             />
 
         </Route>
