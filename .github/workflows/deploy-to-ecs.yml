@@ -1,8 +1,8 @@
-name: Deploy to AWS ECS
+name: 🚀 CD - Deploy to AWS ECS
 
 on:
   workflow_run:
-    workflows: ["Build & Push Docker Image"]
+    workflows: ["🐳 CI - Build & Push Docker Image to ECR"]
     types:
       - completed
 
