@@ -1,7 +1,45 @@
 import React from 'react';
 import { Row, Col, Card } from 'react-bootstrap';
 
+const getTimestampFromItem = (item) => {
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
+
+  const timestampValue =
+    item.timestamp ??
+    item.Timestamp ??
+    item.latestTimestamp ??
+    item.LatestTimestamp ??
+    item.updatedAt ??
+    item.createdAt;
+
+  return typeof timestampValue === 'string' && timestampValue.trim() ? timestampValue : null;
+};
+
+const formatUserTimezoneTimestamp = (timestamp) => {
+  if (!timestamp) {
+    return null;
+  }
+
+  const parsedDate = new Date(timestamp);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'medium',
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  }).format(parsedDate);
+};
+
 const MarketIndices = ({ data = [], error = null }) => {
+  const sectorTimestamp = formatUserTimezoneTimestamp(
+    data.map(getTimestampFromItem).find(Boolean)
+  );
+
   if (error) {
     return (
       <div style={{
@@ -36,7 +74,14 @@ const MarketIndices = ({ data = [], error = null }) => {
 
   return (
     <div className="market-indices" style={{ padding: '4px' }}>
-      <h6 className="mb-1" style={{ fontWeight: 'bold' }}>Market Indices</h6>
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+        <h6 className="mb-0" style={{ fontWeight: 'bold' }}>Market Indices</h6>
+        {sectorTimestamp ? (
+          <small className="text-muted">
+            As of {sectorTimestamp}
+          </small>
+        ) : null}
+      </div>
       <Row xs={4} sm={5} lg={6} className="g-1">
         {data.map((index) => (
           <Col key={index.sector}>

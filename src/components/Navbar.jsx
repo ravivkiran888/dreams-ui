@@ -12,8 +12,11 @@ const Navbar = () => {
             <Nav.Link as={NavLink} to="/" end>
               Home
             </Nav.Link>
-            <Nav.Link as={NavLink} to="/option-chain">
-              Option Chain
+            <Nav.Link as={NavLink} to="/high-volume-scripts">
+              High-Volume
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/bullish">
+              Bullish
             </Nav.Link>
           </Nav>
         
