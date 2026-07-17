@@ -5,6 +5,8 @@ on:
     workflows: ["🐳 CI - Build & Push Docker Image to ECR"]
     types:
       - completed
+  workflow_dispatch:
+    description: 'Manual trigger to deploy latest image to ECS'
 
 env:
   AWS_REGION: us-east-1
