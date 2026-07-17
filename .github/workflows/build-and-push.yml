@@ -15,11 +15,9 @@ env:
   ECR_REPOSITORY: dreams-react-app
 
 jobs:
-  # Job 1: Lint and Test
   lint-and-test:
     runs-on: ubuntu-latest
     name: Lint & Test
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,16 +39,13 @@ jobs:
         run: npm test --if-present
         continue-on-error: true
 
-  # Job 2: Build and Push to ECR
   build-and-push:
     needs: lint-and-test
     runs-on: ubuntu-latest
     name: Build & Push to ECR
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-    
     outputs:
-      image-uri: ${{ steps.image.outputs.image-uri }}
-
+      image-uri: ${{ steps.build-image.outputs.image-uri }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,9 +79,5 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Image build successful
-        run: echo "✅ Docker image built and pushed to ECR: ${{ steps.build-image.outputs.image-uri }}"
-
-      - name: Notify on failure
-        if: failure()
-        run: echo "❌ Build and push failed"
+      - name: Build successful
+        run: echo "✅ Docker image built and pushed successfully"
