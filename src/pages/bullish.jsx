@@ -2,6 +2,22 @@ import React from 'react';
 import { useLoaderData } from 'react-router-dom';
 import Loader from '../components/Loader';
 
+const formatLocalTimestamp = (timestamp) => {
+  if (!timestamp) {
+    return null;
+  }
+
+  const parsedDate = new Date(timestamp);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'medium'  }).format(parsedDate);
+};
+
 const BullishSignals = () => {
   const loaderData = useLoaderData();
 
@@ -10,6 +26,20 @@ const BullishSignals = () => {
   }
 
   const { signals } = loaderData;
+  const signalsList = Array.isArray(signals.data)
+    ? signals.data
+    : Array.isArray(signals.data?.data)
+      ? signals.data.data
+      : [];
+
+  const refreshedAtValue =
+    signals.refreshedAt ??
+    signals.data?.refreshedAt ??
+    signalsList[0]?.refreshedAt ??
+    signalsList[0]?.RefreshedAt;
+
+  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const formattedRefreshedAt = formatLocalTimestamp(refreshedAtValue);
 
   if (signals.error) {
     return (
@@ -41,12 +71,51 @@ const BullishSignals = () => {
         </p>
       </div>
 
-      {signals.data && Array.isArray(signals.data) && signals.data.length > 0 ? (
+      {signalsList.length > 0 ? (
         <div style={{ 
           borderRadius: '8px',
           overflow: 'hidden',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>
+          {formattedRefreshedAt ? (
+            <div style={{
+              padding: '0.85rem 1.25rem',
+              backgroundColor: '#f7f9fb',
+              color: '#4a4a4a',
+              fontSize: '0.9rem',
+              borderBottom: '1px solid #e8e8e8'
+            }}>
+              Refreshed at: {formattedRefreshedAt}
+            </div>
+          ) : null}
+          <div style={{
+            padding: '0.85rem 1.25rem',
+            backgroundColor: '#f7f9fb',
+            borderBottom: '1px solid #e8e8e8',
+            color: '#334155'
+          }}>
+            <div style={{
+              fontSize: '0.85rem',
+              fontWeight: '700',
+              textTransform: 'uppercase',
+              letterSpacing: '0.4px',
+              marginBottom: '0.35rem'
+            }}>
+              Screening Criteria
+            </div>
+            <ul style={{
+              margin: '0',
+              paddingLeft: '1.1rem',
+              fontSize: '0.9rem',
+              lineHeight: '1.4'
+            }}>
+              <li>Momentum: day change percentage is above 0.8.</li>
+              <li>Price strength: last price is greater than average price.</li>
+              <li>Demand: total buy quantity is greater than total sell quantity, and bid quantity is greater than offer quantity.</li>
+              <li>Depth: buy-side order book depth is greater than sell-side depth.</li>
+              <li>Volume candle: current candle has significant volume.</li>
+            </ul>
+          </div>
           <table style={{
             width: '100%',
             borderCollapse: 'collapse',
@@ -114,7 +183,7 @@ const BullishSignals = () => {
               </tr>
             </thead>
             <tbody>
-              {signals.data.map((signal, index) => (
+              {signalsList.map((signal, index) => (
                 <tr key={index} style={{
                   backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8faf7',
                   borderBottom: '1px solid #e8e8e8',
@@ -167,7 +236,7 @@ const BullishSignals = () => {
                       borderRadius: '12px',
                       fontSize: '0.85rem'
                     }}>
-                      {signal.bullishScore}/10
+                      {signal.bullishScore}/5
                     </span>
                   </td>
                   <td style={{

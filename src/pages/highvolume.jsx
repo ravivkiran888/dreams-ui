@@ -47,6 +47,31 @@ const HighVolumeScripts = () => {
           overflow: 'hidden',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}>
+          <div style={{
+            padding: '0.85rem 1.25rem',
+            backgroundColor: '#f7f9fb',
+            borderBottom: '1px solid #e8e8e8',
+            color: '#334155'
+          }}>
+            <div style={{
+              fontSize: '0.85rem',
+              fontWeight: '700',
+              textTransform: 'uppercase',
+              letterSpacing: '0.4px',
+              marginBottom: '0.35rem'
+            }}>
+              Screening Criteria
+            </div>
+            <ul style={{
+              margin: '0',
+              paddingLeft: '1.1rem',
+              fontSize: '0.9rem',
+              lineHeight: '1.4'
+            }}>
+              <li>The latest candle is bullish (Close &gt; Open).</li>
+              <li>The latest candle volume is at least 1.5x the average volume of the preceding five candles on the 5m interval.</li>
+            </ul>
+          </div>
           <table style={{
             width: '100%',
             borderCollapse: 'collapse',
