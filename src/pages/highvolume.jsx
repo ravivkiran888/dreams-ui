@@ -1,27 +1,37 @@
-import React from 'react';
-import { useLoaderData } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../components/Loader';
+import { fetchHighVolumeScriptsData } from '../store/slices/highVolumeSlice';
 
 const HighVolumeScripts = () => {
-  const loaderData = useLoaderData();
+  const dispatch = useDispatch();
+  const { data, error, status } = useSelector((state) => state.highVolume);
+  const selectedSector = useSelector((state) => state.marketIndices.selectedSector);
 
-  if (!loaderData || !loaderData.scripts) {
+  useEffect(() => {
+    dispatch(fetchHighVolumeScriptsData());
+  }, [dispatch]);
+
+  const scriptsList = Array.isArray(data) ? data : [];
+  const selectedSectorNormalized = selectedSector?.trim().toLowerCase() || null;
+  const filteredScripts = selectedSectorNormalized
+    ? scriptsList.filter((script) => (script.Sector || '').trim().toLowerCase() === selectedSectorNormalized)
+    : scriptsList;
+
+  if (status === 'idle' || status === 'loading') {
     return <Loader message="Loading high volume scripts..." />
   }
 
-  const { scripts } = loaderData;
-
-  if (scripts.error) {
+  if (error) {
     return (
       <div className="alert alert-danger" role="alert">
-        Error loading scripts: {scripts.error}
+        Error loading scripts: {error}
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Title Section */}
       <div style={{ marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '2px solid #e0e0e0' }}>
         <h1 style={{ 
           fontSize: '2.5rem', 
@@ -39,9 +49,19 @@ const HighVolumeScripts = () => {
         }}>
           Scripts with significantly higher volume than their 5-candle average
         </p>
+        {selectedSector ? (
+          <p style={{
+            fontSize: '0.9rem',
+            color: '#0d6efd',
+            margin: '0.4rem 0 0 0',
+            fontWeight: '600'
+          }}>
+            Filtered by sector: {selectedSector}
+          </p>
+        ) : null}
       </div>
 
-      {scripts.data && Array.isArray(scripts.data) && scripts.data.length > 0 ? (
+      {filteredScripts.length > 0 ? (
         <div style={{ 
           borderRadius: '8px',
           overflow: 'hidden',
@@ -130,7 +150,7 @@ const HighVolumeScripts = () => {
               </tr>
             </thead>
             <tbody>
-              {scripts.data.map((script, index) => {
+              {filteredScripts.map((script, index) => {
                 const isVolumeHigh = script.LatestVolume > script.AvgPrev5Volume;
                 return (
                   <tr key={index} style={{
@@ -200,7 +220,7 @@ const HighVolumeScripts = () => {
           color: '#999',
           fontSize: '1rem'
         }}>
-          No scripts data available
+          {selectedSector ? `No high volume scripts available for ${selectedSector}` : 'No scripts data available'}
         </div>
       )}
     </div>

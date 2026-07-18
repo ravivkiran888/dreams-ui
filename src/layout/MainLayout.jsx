@@ -1,10 +1,18 @@
-import React from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Navbar from '../components/Navbar'
 import MarketIndices from '../components/MarketIndices'
-import { Outlet, useLoaderData } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { fetchMarketIndices } from '../store/slices/marketIndicesSlice'
 
 const MainLayout = () => {
-  const loaderData = useLoaderData()
+  const dispatch = useDispatch()
+  const location = useLocation()
+  const { data, error, status } = useSelector((state) => state.marketIndices)
+
+  useEffect(() => {
+    dispatch(fetchMarketIndices())
+  }, [dispatch, location.pathname])
 
   return (
    
@@ -12,11 +20,11 @@ const MainLayout = () => {
           <Navbar></Navbar>
 
           {/* Market Indices - Shown on every page */}
-          {loaderData?.marketIndices && (
+          {(status === 'loading' || data.length > 0 || error) && (
             <div className="px-4 pt-2">
               <MarketIndices 
-                data={loaderData.marketIndices.data} 
-                error={loaderData.marketIndices.error} 
+                data={data} 
+                error={error} 
               />
             </div>
           )}

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Navbar as BootstrapNavbar, Nav } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
 

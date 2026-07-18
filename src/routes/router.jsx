@@ -11,14 +11,10 @@ import Dashboard from "../pages/Dashboard"
 import HighVolumeScripts from "../pages/highvolume"
 import BullishSignals from "../pages/bullish"
 import Loader from "../components/Loader"
-import { dashboardLoader } from "../loaders/dashboardLoader"
-import { highVolumeScriptsLoader } from "../loaders/highVolumeScriptsLoader"
-import { bullishLoader } from "../loaders/bullishLoader"
-import { mainLayoutLoader } from "../loaders/mainLayoutLoader"
 
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route path="/" element={<MainLayout />} loader={mainLayoutLoader}>
+        <Route path="/" element={<MainLayout />}>
 
             <Route
                 index
@@ -27,7 +23,6 @@ const router = createBrowserRouter(
                         <Dashboard />
                     </Suspense>
                 }
-                loader={dashboardLoader}
             />
 
             <Route
@@ -37,7 +32,6 @@ const router = createBrowserRouter(
                         <HighVolumeScripts />
                     </Suspense>
                 }
-                loader={highVolumeScriptsLoader}
             />
 
             <Route
@@ -47,7 +41,6 @@ const router = createBrowserRouter(
                         <BullishSignals />
                     </Suspense>
                 }
-                loader={bullishLoader}
             />
 
             <Route

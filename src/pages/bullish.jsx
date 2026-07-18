@@ -1,6 +1,7 @@
-import React from 'react';
-import { useLoaderData } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../components/Loader';
+import { fetchBullishSignalsData } from '../store/slices/bullishSlice';
 
 const formatLocalTimestamp = (timestamp) => {
   if (!timestamp) {
@@ -19,39 +20,45 @@ const formatLocalTimestamp = (timestamp) => {
 };
 
 const BullishSignals = () => {
-  const loaderData = useLoaderData();
+  const dispatch = useDispatch();
+  const { data, error, status } = useSelector((state) => state.bullish);
+  const selectedSector = useSelector((state) => state.marketIndices.selectedSector);
 
-  if (!loaderData || !loaderData.signals) {
+  useEffect(() => {
+    dispatch(fetchBullishSignalsData());
+  }, [dispatch]);
+
+  if (status === 'idle' || status === 'loading') {
     return <Loader message="Loading bullish signals..." />
   }
 
-  const { signals } = loaderData;
-  const signalsList = Array.isArray(signals.data)
-    ? signals.data
-    : Array.isArray(signals.data?.data)
-      ? signals.data.data
+  const signalsList = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.data)
+      ? data.data
       : [];
+  const selectedSectorNormalized = selectedSector?.trim().toLowerCase() || null;
+  const filteredSignals = selectedSectorNormalized
+    ? signalsList.filter((signal) => (signal.sector || '').trim().toLowerCase() === selectedSectorNormalized)
+    : signalsList;
 
   const refreshedAtValue =
-    signals.refreshedAt ??
-    signals.data?.refreshedAt ??
+    data?.refreshedAt ??
     signalsList[0]?.refreshedAt ??
     signalsList[0]?.RefreshedAt;
 
-  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const formattedRefreshedAt = formatLocalTimestamp(refreshedAtValue);
 
-  if (signals.error) {
+  if (error) {
     return (
       <div className="alert alert-danger" role="alert">
-        Error loading signals: {signals.error}
+        Error loading signals: {error}
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Title Section */}
       <div style={{ marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '2px solid #e0e0e0' }}>
         <h1 style={{ 
           fontSize: '2.5rem', 
@@ -69,9 +76,19 @@ const BullishSignals = () => {
         }}>
           Stocks showing bullish technical indicators
         </p>
+        {selectedSector ? (
+          <p style={{
+            fontSize: '0.9rem',
+            color: '#27ae60',
+            margin: '0.4rem 0 0 0',
+            fontWeight: '600'
+          }}>
+            Filtered by sector: {selectedSector}
+          </p>
+        ) : null}
       </div>
 
-      {signalsList.length > 0 ? (
+      {filteredSignals.length > 0 ? (
         <div style={{ 
           borderRadius: '8px',
           overflow: 'hidden',
@@ -183,7 +200,7 @@ const BullishSignals = () => {
               </tr>
             </thead>
             <tbody>
-              {signalsList.map((signal, index) => (
+              {filteredSignals.map((signal, index) => (
                 <tr key={index} style={{
                   backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8faf7',
                   borderBottom: '1px solid #e8e8e8',
@@ -245,7 +262,6 @@ const BullishSignals = () => {
                     fontSize: '0.9rem'
                   }}>
                     <span style={{
-                      display: 'inline-block',
                       width: '24px',
                       height: '24px',
                       borderRadius: '50%',
@@ -266,7 +282,6 @@ const BullishSignals = () => {
                     fontSize: '0.9rem'
                   }}>
                     <span style={{
-                      display: 'inline-block',
                       width: '24px',
                       height: '24px',
                       borderRadius: '50%',
@@ -293,7 +308,7 @@ const BullishSignals = () => {
           color: '#999',
           fontSize: '1rem'
         }}>
-          No bullish signals available
+          {selectedSector ? `No bullish signals available for ${selectedSector}` : 'No bullish signals available'}
         </div>
       )}
     </div>
