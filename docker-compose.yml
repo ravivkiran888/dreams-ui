@@ -8,7 +8,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_BASE_URL=http://localhost:8082
+      - VITE_API_BASE_URL
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:5173', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
       interval: 30s
