@@ -1,5 +1,5 @@
 # Use official Node.js runtime as a parent image
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -21,7 +21,7 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Install serve to run the React app
 RUN npm install -g serve
