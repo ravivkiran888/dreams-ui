@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../components/Loader';
 import { fetchBullishSignalsData } from '../store/slices/bullishSlice';
@@ -23,6 +23,7 @@ const BullishSignals = () => {
   const dispatch = useDispatch();
   const { data, error, status } = useSelector((state) => state.bullish);
   const selectedSector = useSelector((state) => state.marketIndices.selectedSector);
+  const [lastPriceSortDirection, setLastPriceSortDirection] = useState(null);
 
   useEffect(() => {
     dispatch(fetchBullishSignalsData());
@@ -41,6 +42,16 @@ const BullishSignals = () => {
   const filteredSignals = selectedSectorNormalized
     ? signalsList.filter((signal) => (signal.sector || '').trim().toLowerCase() === selectedSectorNormalized)
     : signalsList;
+  const sortedSignals = lastPriceSortDirection
+    ? [...filteredSignals].sort((leftSignal, rightSignal) => {
+        const leftPrice = Number(leftSignal.lastPrice) || 0;
+        const rightPrice = Number(rightSignal.lastPrice) || 0;
+
+        return lastPriceSortDirection === 'asc'
+          ? leftPrice - rightPrice
+          : rightPrice - leftPrice;
+      })
+    : filteredSignals;
 
   const refreshedAtValue =
     data?.refreshedAt ??
@@ -48,6 +59,16 @@ const BullishSignals = () => {
     signalsList[0]?.RefreshedAt;
 
   const formattedRefreshedAt = formatLocalTimestamp(refreshedAtValue);
+
+  const handleLastPriceSortToggle = () => {
+    setLastPriceSortDirection((currentDirection) => {
+      if (currentDirection === 'asc') {
+        return 'desc';
+      }
+
+      return 'asc';
+    });
+  };
 
   if (error) {
     return (
@@ -168,7 +189,20 @@ const BullishSignals = () => {
                   fontSize: '0.95rem',
                   letterSpacing: '0.3px'
                 }}>
-                  Last Price
+                  <button
+                    type="button"
+                    onClick={handleLastPriceSortToggle}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'inherit',
+                      padding: 0,
+                      font: 'inherit',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Last Price {lastPriceSortDirection === 'asc' ? '↑' : lastPriceSortDirection === 'desc' ? '↓' : ''}
+                  </button>
                 </th>
                 <th style={{
                   padding: '1rem 1.5rem',
@@ -200,7 +234,7 @@ const BullishSignals = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredSignals.map((signal, index) => (
+              {sortedSignals.map((signal, index) => (
                 <tr key={index} style={{
                   backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8faf7',
                   borderBottom: '1px solid #e8e8e8',

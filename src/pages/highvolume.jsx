@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../components/Loader';
 import { fetchHighVolumeScriptsData } from '../store/slices/highVolumeSlice';
@@ -7,6 +7,7 @@ const HighVolumeScripts = () => {
   const dispatch = useDispatch();
   const { data, error, status } = useSelector((state) => state.highVolume);
   const selectedSector = useSelector((state) => state.marketIndices.selectedSector);
+  const [ltpSortDirection, setLtpSortDirection] = useState(null);
 
   useEffect(() => {
     dispatch(fetchHighVolumeScriptsData());
@@ -17,6 +18,26 @@ const HighVolumeScripts = () => {
   const filteredScripts = selectedSectorNormalized
     ? scriptsList.filter((script) => (script.Sector || '').trim().toLowerCase() === selectedSectorNormalized)
     : scriptsList;
+  const sortedScripts = ltpSortDirection
+    ? [...filteredScripts].sort((leftScript, rightScript) => {
+        const leftPrice = Number(leftScript.LatestClosePrice) || 0;
+        const rightPrice = Number(rightScript.LatestClosePrice) || 0;
+
+        return ltpSortDirection === 'asc'
+          ? leftPrice - rightPrice
+          : rightPrice - leftPrice;
+      })
+    : filteredScripts;
+
+  const handleLtpSortToggle = () => {
+    setLtpSortDirection((currentDirection) => {
+      if (currentDirection === 'asc') {
+        return 'desc';
+      }
+
+      return 'asc';
+    });
+  };
 
   if (status === 'idle' || status === 'loading') {
     return <Loader message="Loading high volume scripts..." />
@@ -145,13 +166,46 @@ const HighVolumeScripts = () => {
                   fontSize: '0.95rem',
                   letterSpacing: '0.3px'
                 }}>
+                  <button
+                    type="button"
+                    onClick={handleLtpSortToggle}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'inherit',
+                      padding: 0,
+                      font: 'inherit',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    LTP {ltpSortDirection === 'asc' ? '↑' : ltpSortDirection === 'desc' ? '↓' : ''}
+                  </button>
+                </th>
+                <th style={{
+                  padding: '1rem 1.5rem',
+                  textAlign: 'right',
+                  fontWeight: '600',
+                  fontSize: '0.95rem',
+                  letterSpacing: '0.3px'
+                }}>
+                  Day Change
+                </th>
+                <th style={{
+                  padding: '1rem 1.5rem',
+                  textAlign: 'right',
+                  fontWeight: '600',
+                  fontSize: '0.95rem',
+                  letterSpacing: '0.3px'
+                }}>
                   Latest Timestamp
                 </th>
               </tr>
             </thead>
             <tbody>
-              {filteredScripts.map((script, index) => {
+              {sortedScripts.map((script, index) => {
                 const isVolumeHigh = script.LatestVolume > script.AvgPrev5Volume;
+                const dayChange = Number(script.DayChange);
+                const hasDayChange = Number.isFinite(dayChange);
                 return (
                   <tr key={index} style={{
                     backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8f9fb',
@@ -198,6 +252,23 @@ const HighVolumeScripts = () => {
                       color: '#666'
                     }}>
                       {script.AvgPrev5Volume.toLocaleString()}
+                    </td>
+                    <td style={{
+                      padding: '1rem 1.5rem',
+                      textAlign: 'right',
+                      fontSize: '0.9rem',
+                      color: '#666'
+                    }}>
+                      {script.LatestClosePrice ?? <span style={{ color: '#999' }}>—</span>}
+                    </td>
+                    <td style={{
+                      padding: '1rem 1.5rem',
+                      textAlign: 'right', 
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      color: hasDayChange ? (dayChange >= 0 ? '#27ae60' : '#e74c3c') : '#999'
+                    }}>
+                      {hasDayChange ? `${dayChange >= 0 ? '+' : ''}${dayChange.toFixed(2)}` : <span style={{ color: '#999' }}>—</span>}
                     </td>
                     <td style={{
                       padding: '1rem 1.5rem',
